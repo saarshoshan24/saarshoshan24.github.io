@@ -402,10 +402,10 @@
     .mw-dots { display: inline-flex; gap: 5px; }
     .mw-dots i { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.28); display: block; }
     .mw-url { font-family: var(--f-mono); font-size: 11px; opacity: .85; }
-    .mw-rtl-body {
+    .mw-ltr-body {
       padding: 12px;
-      direction: rtl;
-      text-align: right;
+      direction: ltr;
+      text-align: left;
       display: grid;
       gap: 8px;
     }
@@ -424,12 +424,12 @@
     .mw-deal {
       background: #ffffff;
       border: 1px solid #aab3bd;
-      border-right: 4px solid #5D7FC4;
+      border-left: 4px solid #5D7FC4;
       border-radius: 9px;
       padding: 10px;
       font-size: 13px;
     }
-    .mw-deal.done { border-right-color: #37a866; }
+    .mw-deal.done { border-left-color: #37a866; }
     .mw-deal-top {
       display: flex;
       justify-content: space-between;
@@ -463,7 +463,7 @@
       margin-top: 6px;
       padding: 5px 8px;
       background: rgba(14, 124, 134, 0.08);
-      border-right: 3px solid #0E7C86;
+      border-left: 3px solid #0E7C86;
       border-radius: 5px;
       font-size: 12px;
       color: #222a31;
@@ -682,7 +682,7 @@
               </div>
               <div>
                 <dt>Impact</dt>
-                <dd>Zero change to how the manager sends quotes. Mobile-first Hebrew RTL interface used every day by the sales team and management.</dd>
+                <dd>Zero change to how the manager sends quotes. Mobile-first web interface (available in English LTR &amp; original Hebrew RTL) used every day by the sales team and management.</dd>
               </div>
             </dl>
 
@@ -691,12 +691,13 @@
               <span class="tag">Built with Claude Code</span>
               <span class="tag">Email Intake Automation</span>
               <span class="tag">Automated Follow-Up Nudges</span>
-              <span class="tag">Mobile-First Hebrew RTL</span>
+              <span class="tag">Mobile-First Web App (EN &amp; HE RTL)</span>
             </div>
 
             <div class="cta-row">
-              <a class="btn btn-primary" href="https://saarshoshan24.github.io/email-to-deal-tracker/">Open Interactive Demo &amp; Case Study ↗</a>
-              <a class="btn btn-ghost" href="https://github.com/saarshoshan24/email-to-deal-tracker" target="_blank" rel="noopener">View Case Study Repo ↗</a>
+              <a class="btn btn-primary" href="https://saarshoshan24.github.io/email-to-deal-tracker/">Open Interactive Demo (EN) ↗</a>
+              <a class="btn btn-ghost" href="https://saarshoshan24.github.io/email-to-deal-tracker/he/">Hebrew RTL Version ↗</a>
+              <a class="btn btn-ghost" href="https://github.com/saarshoshan24/email-to-deal-tracker" target="_blank" rel="noopener">Case Study Repo ↗</a>
             </div>
           </div>
 
@@ -706,32 +707,32 @@
                 <span class="mw-dots"><i></i><i></i><i></i></span>
                 <span class="mw-url">tracker.example.com/deals</span>
               </div>
-              <div class="mw-rtl-body" lang="he">
+              <div class="mw-ltr-body" lang="en">
                 <div class="mw-kpis">
-                  <span><b>6</b> פתוח</span>
-                  <span><b>2</b> הועברה לביצוע</span>
-                  <span style="color:#d8392b"><b>1</b> באיחור</span>
+                  <span><b>6</b> Open</span>
+                  <span><b>2</b> Completed</span>
+                  <span style="color:#d8392b"><b>1</b> Overdue</span>
                 </div>
                 <div class="mw-deal">
                   <div class="mw-deal-top">
-                    <span>גן אירועים הדקל <small style="color:#687279;font-weight:600">#10482</small></span>
-                    <span dir="ltr">₪18,400</span>
+                    <span>Palm Grove Events <small style="color:#687279;font-weight:600">#10482</small></span>
+                    <span dir="ltr">$18,400</span>
                   </div>
                   <div class="mw-deal-meta">
-                    <span>יעד: 04/10/2026</span>
-                    <span class="mw-pill">דנה לוי</span>
-                    <span class="mw-pill-warn">⚠ נדחה</span>
+                    <span>Due: 04/10/2026</span>
+                    <span class="mw-pill">Dana Levy</span>
+                    <span class="mw-pill-warn">⚠ Rescheduled</span>
                   </div>
-                  <div class="mw-note">📝 הלקוח ביקש לחזור אליו אחרי החגים. קבענו שיחה ל־4/10.</div>
+                  <div class="mw-note">📝 Client asked to reconnect after the holidays. Call set for Oct 4.</div>
                 </div>
                 <div class="mw-deal done">
                   <div class="mw-deal-top">
-                    <span>הובלות נחל בע״מ <small style="color:#687279;font-weight:600">#10455</small></span>
-                    <span dir="ltr">₪22,300</span>
+                    <span>Nahal Logistics Ltd. <small style="color:#687279;font-weight:600">#10455</small></span>
+                    <span dir="ltr">$22,300</span>
                   </div>
                   <div class="mw-deal-meta">
-                    <span class="mw-pill" style="background:#dcf3e6;color:#1f7a3d">הועברה לביצוע</span>
-                    <span class="mw-pill">יואב מזרחי</span>
+                    <span class="mw-pill" style="background:#dcf3e6;color:#1f7a3d">Completed</span>
+                    <span class="mw-pill">Yoav Mizrahi</span>
                   </div>
                 </div>
               </div>
