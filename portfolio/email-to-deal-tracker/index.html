@@ -1,0 +1,1118 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><title>Email-to-Deal Tracker</title><meta name="description" content="Case study: a sales tracker I designed and built solo that turns emailed price quotes into deals, reminds salespeople to follow up, and runs a small business daily. Interactive demo with invented data."><meta property="og:title" content="No price quote gets forgotten: Email-to-Deal Tracker"><meta property="og:description" content="I built an app that turns every emailed price quote into a deal, reminds the salesperson to follow up, and sends the manager a weekly summary. In daily use since July 2026. Try the interactive demo."><meta property="og:type" content="website"><meta property="og:url" content="https://saarshoshan24.github.io/email-to-deal-tracker/"><meta name="twitter:card" content="summary"></head><body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Rubik:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ───────────── Page (case study) tokens ───────────── */
+:root {
+  --pg-bg: #eef1f3;
+  --pg-surface: #ffffff;
+  --pg-sunk: #e4e8eb;
+  --pg-ink: #1b232a;
+  --pg-muted: #56626b;
+  --pg-line: #d3dade;
+  --accent: #0E7C86;
+  --accent-text: #0b6870;
+  --shadow: 0 1px 2px rgba(27,35,42,.06), 0 12px 32px rgba(27,35,42,.10);
+  --f-display: "Rubik", "Segoe UI", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --pg-bg: #12171b; --pg-surface: #1a2127; --pg-sunk: #0e1215;
+    --pg-ink: #e6ebee; --pg-muted: #9aa6ae; --pg-line: #2b353d;
+    --accent-text: color-mix(in oklab, var(--accent) 55%, white);
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 16px 40px rgba(0,0,0,.45);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --pg-bg: #12171b; --pg-surface: #1a2127; --pg-sunk: #0e1215;
+  --pg-ink: #e6ebee; --pg-muted: #9aa6ae; --pg-line: #2b353d;
+  --accent-text: color-mix(in oklab, var(--accent) 55%, white);
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 16px 40px rgba(0,0,0,.45);
+}
+
+body { background: var(--pg-bg); color: var(--pg-ink); font-family: var(--f-body);
+  font-size: 16px; line-height: 1.6; margin: 0; }
+.wrap { max-width: 1200px; margin-inline: auto; padding-inline: 20px; }
+@media (max-width: 480px) { .wrap { padding-inline: 16px; } }
+a { color: var(--accent-text); }
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.eyebrow { font-family: var(--f-mono); font-size: 12.5px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--pg-muted); margin: 0 0 12px; }
+h1.pg, h2.pg, h3.pg { font-family: var(--f-display); text-wrap: balance; margin: 0; color: var(--pg-ink); }
+h1.pg { font-size: clamp(34px, 5vw, 52px); font-weight: 700; line-height: 1.05; letter-spacing: -.015em; }
+h2.pg { font-size: clamp(24px, 3vw, 30px); font-weight: 600; line-height: 1.15; }
+h3.pg { font-size: 18px; font-weight: 600; line-height: 1.3; }
+
+/* hero */
+.hero { padding-block: 56px 28px; display: grid; gap: 22px; }
+.hero .lede { font-size: 19px; line-height: 1.55; max-width: 64ch; margin: 0; color: var(--pg-ink); }
+.hero .lede em { font-style: normal; background: color-mix(in srgb, var(--accent) 16%, transparent); padding: 0 3px; border-radius: 3px; }
+.facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin: 8px 0 0;
+  border-block: 1px solid var(--pg-line); }
+.facts > div { padding: 14px 16px 14px 0; }
+.facts > div + div { padding-inline-start: 16px; border-inline-start: 1px solid var(--pg-line); }
+.facts dt { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--pg-muted); }
+.facts dd { margin: 4px 0 0; font-family: var(--f-display); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.facts dd small { display: block; font-family: var(--f-body); font-size: 13px; font-weight: 400; color: var(--pg-muted); }
+@media (max-width: 760px) {
+  .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .facts > div:nth-child(3) { padding-inline-start: 0; border-inline-start: 0; }
+  .facts > div:nth-child(n+3) { border-block-start: 1px solid var(--pg-line); }
+}
+
+/* demo */
+.demo { display: grid; grid-template-columns: minmax(270px, 330px) minmax(0, 1fr); gap: 28px; align-items: start;
+  padding-block: 20px 56px; }
+.panel { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); display: grid; gap: 20px; }
+/* Narrow: screen + brand pickers go ABOVE the device, notes below it; the device drops its inner
+   scroll box so the page scrolls naturally (nested scroll areas trap thumbs on phones). */
+@media (max-width: 960px) {
+  .demo { grid-template-columns: minmax(0, 1fr); gap: 18px; padding-block: 8px 40px; }
+  .panel { display: contents; }
+  .ctl-view { order: 1; } .ctl-brand { order: 2; } .device { order: 3; } .ctl-notes { order: 4; }
+  .demo .ctl-dev { display: none; }
+  .brand-note { display: none; }
+  .demo .screen { height: auto; max-height: none; overflow: visible; }
+  .seg button { flex: 1 1 auto; }
+}
+@media (max-width: 640px) {
+  .app .mail-wrap table[width="600"] { width: 100% !important; }
+  .app .mail-wrap > table > tbody > tr > td { padding: 10px !important; }
+  .app .row { flex-direction: column; }
+}
+.ctl { display: grid; gap: 8px; }
+.ctl-label { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--pg-muted); }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button { font: 500 14px/1 var(--f-body); color: var(--pg-ink); background: var(--pg-surface);
+  border: 1px solid var(--pg-line); border-radius: 8px; padding: 9px 12px; cursor: pointer; }
+.seg button:hover { border-color: var(--pg-muted); }
+.seg button[aria-pressed="true"] { background: var(--pg-ink); color: var(--pg-bg); border-color: var(--pg-ink); }
+.swatches { display: flex; gap: 8px; flex-wrap: wrap; }
+.swatch { display: inline-flex; align-items: center; gap: 8px; font: 500 13.5px/1 var(--f-body); color: var(--pg-ink);
+  background: var(--pg-surface); border: 1px solid var(--pg-line); border-radius: 999px; padding: 6px 12px 6px 6px; cursor: pointer; }
+.swatch i { width: 18px; height: 18px; border-radius: 50%; display: block; box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); }
+.swatch[aria-pressed="true"] { border-color: var(--pg-ink); box-shadow: 0 0 0 1px var(--pg-ink); }
+.brand-note { font-size: 13.5px; color: var(--pg-muted); margin: 0; }
+.brand-note code { font-family: var(--f-mono); font-size: 12px; background: var(--pg-sunk); padding: 1px 5px; border-radius: 4px; color: var(--pg-ink); }
+
+.notes-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; counter-reset: n; }
+.notes-list li { counter-increment: n; padding: 10px 12px 10px 38px; border-radius: 8px; position: relative; cursor: default;
+  border: 1px solid transparent; }
+.notes-list li::before { content: counter(n); position: absolute; left: 12px; top: 11px; font: 500 12px/18px var(--f-mono);
+  width: 18px; height: 18px; text-align: center; border-radius: 50%; background: var(--pg-sunk); color: var(--pg-muted); }
+.notes-list li:hover, .notes-list li:focus-visible, .notes-list li.on { background: var(--pg-surface); border-color: var(--pg-line); }
+.notes-list li:hover::before, .notes-list li.on::before { background: var(--accent); color: #fff; }
+.notes-list b { display: block; font-weight: 600; font-size: 14.5px; line-height: 1.35; }
+.notes-list span { display: block; font-size: 13.5px; color: var(--pg-muted); line-height: 1.5; margin-top: 2px; }
+.hint-line { font-size: 12.5px; color: var(--pg-muted); margin: 0; }
+/* "find it" affordance: a crosshair on the pill and on every note, lit when its target is highlighted */
+:root { --find: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round'%3E%3Ccircle cx='8' cy='8' r='4.6'/%3E%3Ccircle cx='8' cy='8' r='1.1' fill='black'/%3E%3Cpath d='M8 .8v2.6M8 12.6v2.6M.8 8h2.6M12.6 8h2.6'/%3E%3C/svg%3E"); }
+.ctl-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.find-pill { display: inline-flex; align-items: center; gap: 6px; font: 500 12.5px/1 var(--f-body); color: var(--accent-text);
+  background: color-mix(in srgb, var(--accent) 12%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent);
+  border-radius: 999px; padding: 5px 10px 5px 7px; }
+.find-ic { display: inline-block; width: 14px; height: 14px; flex: 0 0 auto; background-color: currentColor;
+  -webkit-mask: var(--find) center / contain no-repeat; mask: var(--find) center / contain no-repeat; }
+.notes-list li { padding-inline-end: 40px; cursor: pointer; }
+.notes-list li::after { content: ""; position: absolute; right: 12px; top: 11px; width: 17px; height: 17px; background-color: var(--pg-muted); opacity: .55;
+  -webkit-mask: var(--find) center / contain no-repeat; mask: var(--find) center / contain no-repeat; transition: opacity .15s, background-color .15s, transform .15s; }
+.notes-list li:hover::after, .notes-list li:focus-visible::after, .notes-list li.on::after { background-color: var(--accent); opacity: 1; transform: scale(1.12); }
+@media (prefers-reduced-motion: reduce) { .notes-list li::after { transition: none; } }
+.touch-only { display: none; }
+@media (hover: none) { .hover-only { display: none; } .touch-only { display: inline; } }
+
+.device { min-width: 0; }
+.browser { background: var(--pg-surface); border: 1px solid var(--pg-line); border-radius: 14px; overflow: hidden;
+  box-shadow: var(--shadow); margin-inline: auto; transition: max-width .25s ease; max-width: 100%; }
+.browser.phone { max-width: 400px; }
+@media (prefers-reduced-motion: reduce) { .browser { transition: none; } }
+.chrome { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--pg-sunk); border-bottom: 1px solid var(--pg-line); }
+.dots { display: flex; gap: 6px; flex: 0 0 auto; }
+.dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--pg-line); display: block; }
+.url { flex: 1; min-width: 0; font: 12.5px/1 var(--f-mono); color: var(--pg-muted); background: var(--pg-surface);
+  border: 1px solid var(--pg-line); border-radius: 6px; padding: 7px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.url b { color: var(--pg-ink); font-weight: 500; }
+.screen { height: min(780px, 82vh); overflow: auto; overscroll-behavior: contain; background: #f3f5f7; }
+.caption { font-size: 13px; color: var(--pg-muted); margin: 10px 2px 0; }
+
+/* annotation highlight inside the app */
+.app .hl { outline: 2.5px dashed var(--accent) !important; outline-offset: 3px; border-radius: 6px;
+  animation: hlpulse 1.4s ease-in-out infinite; position: relative; z-index: 2; }
+@keyframes hlpulse { 50% { outline-color: color-mix(in srgb, var(--accent) 35%, transparent); } }
+@media (prefers-reduced-motion: reduce) { .app .hl { animation: none; } }
+
+/* content sections */
+.block { padding-block: 48px; border-top: 1px solid var(--pg-line); }
+.block-head { display: grid; gap: 10px; margin-bottom: 28px; max-width: 70ch; }
+.block-head p { margin: 0; color: var(--pg-muted); }
+
+.flow { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0;
+  border: 1px solid var(--pg-line); border-radius: 12px; background: var(--pg-surface); overflow: hidden; }
+.flow li { padding: 18px 16px 20px; display: grid; gap: 6px; align-content: start; }
+.flow li + li { border-inline-start: 1px solid var(--pg-line); }
+.flow .num { font: 500 12px/1 var(--f-mono); color: var(--accent-text); }
+.flow b { font-family: var(--f-display); font-weight: 600; font-size: 16px; line-height: 1.25; }
+.flow span { font-size: 14px; color: var(--pg-muted); line-height: 1.5; }
+.flow code, .inc code, .dec code { font-family: var(--f-mono); font-size: .86em; background: var(--pg-sunk); padding: 1px 5px; border-radius: 4px; color: var(--pg-ink); }
+@media (max-width: 1000px) {
+  .flow { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .flow li:nth-child(4) { border-inline-start: 0; }
+  .flow li:nth-child(n+4) { border-top: 1px solid var(--pg-line); }
+}
+@media (max-width: 560px) {
+  .flow { grid-template-columns: minmax(0, 1fr); }
+  .flow li + li { border-inline-start: 0; border-top: 1px solid var(--pg-line); }
+}
+
+.incidents { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 820px) { .incidents { grid-template-columns: minmax(0, 1fr); } }
+.inc { background: var(--pg-surface); border: 1px solid var(--pg-line); border-radius: 12px; padding: 20px 22px; display: grid; gap: 12px; align-content: start; }
+.inc header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.inc .tag { font: 500 11.5px/1 var(--f-mono); letter-spacing: .05em; text-transform: uppercase; color: var(--pg-muted); }
+.inc dl { margin: 0; display: grid; grid-template-columns: 5.5em minmax(0, 1fr); gap: 8px 14px; font-size: 14.5px; line-height: 1.55; }
+.inc dt { font: 500 11.5px/1.9 var(--f-mono); letter-spacing: .05em; text-transform: uppercase; color: var(--pg-muted); }
+.inc dd { margin: 0; }
+.inc dd.lesson { font-weight: 500; }
+@media (max-width: 480px) { .inc dl { grid-template-columns: minmax(0, 1fr); gap: 2px; } .inc dd { margin-bottom: 8px; } }
+
+.decisions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px 32px; }
+@media (max-width: 900px) { .decisions { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .decisions { grid-template-columns: minmax(0, 1fr); } }
+.dec { display: grid; gap: 8px; align-content: start; }
+.dec p { margin: 0; font-size: 15px; color: var(--pg-ink); }
+.dec .over { font-size: 13.5px; color: var(--pg-muted); }
+.dec .over b { font-weight: 600; color: var(--pg-ink); }
+
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; }
+@media (max-width: 820px) { .two { grid-template-columns: minmax(0, 1fr); gap: 32px; } }
+.stack { display: grid; gap: 10px; margin: 0; }
+.stack > div { display: grid; grid-template-columns: 8.5em minmax(0, 1fr); gap: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--pg-line); font-size: 15px; }
+.stack dt { font: 500 12px/1.8 var(--f-mono); letter-spacing: .05em; text-transform: uppercase; color: var(--pg-muted); }
+.stack dd { margin: 0; }
+.limits { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+.limits li { font-size: 15px; padding-inline-start: 18px; position: relative; }
+.limits li::before { content: ""; position: absolute; left: 0; top: .62em; width: 8px; height: 2px; background: var(--pg-muted); }
+
+footer.pg-foot { border-top: 1px solid var(--pg-line); padding-block: 28px 48px; color: var(--pg-muted); font-size: 14px; }
+footer.pg-foot { display: grid; gap: 10px; }
+footer.pg-foot p { margin: 0; max-width: 80ch; }
+footer.pg-foot .built { color: var(--pg-ink); }
+footer.pg-foot .built b { font: 500 11.5px/1 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--pg-muted); margin-inline-end: 8px; }
+@media (min-width: 481px) { .inc dl { grid-template-columns: 6.5em minmax(0, 1fr); } }
+
+/* ═══════════ The app — production app.css, scoped under .app ═══════════
+   Values are the shipped stylesheet's. Only the three brand tokens change per client. */
+.app {
+  --bg: #f3f5f7; --card: #fff; --ink: #222a31; --muted: #687279;
+  --brand: #0E7C86; --brand-ink: #fff; --brand-press: #0A636B; --slate: #243240; --slate-ink: #f4f6f7;
+  --line: #cbd2d9; --line-strong: #aab3bd;
+  --st-open: #5D7FC4; --st-done: #37a866; --st-cancelled: #6b7385;
+  --warn-bg: #fdecd7; --warn-ink: #9a4a12; --ok: #1f9d57; --danger: #d8392b;
+  --radius: 10px;
+  color-scheme: light;
+  font-family: "Assistant", system-ui, "Segoe UI", Arial, sans-serif;
+  background: var(--bg); color: var(--ink); font-size: 17px; line-height: 1.4;
+  -webkit-font-smoothing: antialiased; min-height: 100%;
+}
+.app * { box-sizing: border-box; }
+.app .topbar { display: flex; align-items: center; gap: 12px; background: var(--slate); color: var(--slate-ink); padding: 8px 16px; }
+.app .brand { font-weight: 800; font-size: 19px; letter-spacing: .2px; display: inline-flex; align-items: center; gap: 8px; }
+.app .brand-logo { width: 28px; height: 28px; display: block; }
+.app .topbar .who { margin-inline-start: auto; opacity: .85; font-size: 15px; }
+.app .topbar .logout { color: var(--slate-ink); text-decoration: underline; font-size: 15px; opacity: .9; cursor: default; }
+.app .container { max-width: 720px; margin-inline: auto; padding: 12px; }
+.app h1 { font-size: 19px; margin: 0 0 8px; }
+.app h2 { font-size: 17px; margin: 0 0 8px; }
+.app section { background: var(--card); border: 1.5px solid var(--line); border-radius: var(--radius); padding: 12px; margin-block-end: 12px; }
+.app .app-tabs { background: var(--card); border-block-end: 1px solid var(--line); position: sticky; top: 0; z-index: 5; }
+.app .app-tabs-inner { max-width: 720px; margin-inline: auto; display: flex; gap: 8px; padding: 10px 12px; overflow-x: auto; scrollbar-width: none; }
+.app .app-tab { flex: 0 0 auto; padding: 9px 16px; font-size: 15px; font-weight: 700; color: var(--slate); background: #eef1f4;
+  border: 1px solid var(--line); border-radius: 999px; text-decoration: none; white-space: nowrap; cursor: pointer; font-family: inherit; }
+.app .app-tab:hover { background: #e3e8ed; }
+.app .app-tab.active { color: var(--brand-ink); background: var(--brand); border-color: var(--brand);
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--brand) 28%, transparent); }
+.app .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.app .greeting { margin: 0 0 12px; font-size: 20px; font-weight: 800; color: var(--slate); }
+.app .unassigned { color: var(--brand); font-weight: 700; }
+.app .overview { background: #f8fafb; }
+.app .ov-status { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; }
+.app .ov-label { font-size: 13px; color: var(--muted); font-weight: 700; }
+.app .ov-stat { font-size: 14px; color: var(--ink); }
+.app .ov-stat b { font-size: 17px; font-weight: 800; margin-inline-end: 2px; }
+.app .ov-overdue b { color: var(--danger); }
+.app .overview-cards { background: var(--bg); }
+.app .overview-cards .ov-label { display: block; margin-block-end: 10px; }
+.app label { display: block; margin-block-end: 8px; font-size: 14px; color: var(--muted); }
+.app input, .app select, .app textarea { display: block; width: 100%; margin-block-start: 3px; font: inherit; font-size: 16px; padding: 9px 11px; min-height: 44px;
+  border: 1.5px solid var(--line-strong); border-radius: 10px; background: #fff; color: var(--ink); }
+.app textarea { min-height: 56px; }
+.app .row { display: flex; gap: 10px; }
+.app .row > label { flex: 1; }
+.app.narrow .row { flex-direction: column; }
+.app.narrow .mail-wrap table[width="600"] { width: 100% !important; }
+.app.narrow .mail-wrap > table > tbody > tr > td { padding: 10px !important; }
+.app button.primary { width: 100%; min-height: 46px; font: inherit; font-size: 17px; font-weight: 700; background: var(--brand); color: var(--brand-ink); border: 0;
+  border-radius: 10px; cursor: pointer; margin-block-start: 2px; }
+.app button.primary:active { background: var(--brand-press); }
+.app :where(a, button, input, select, textarea):focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.app .deals { list-style: none; margin: 0; padding: 10px; background: var(--bg); border-radius: var(--radius); }
+.app .deal { border: 1px solid var(--line-strong); border-radius: 12px; margin-block-end: 14px; padding: 12px; background: var(--card);
+  box-shadow: 0 1px 2px rgba(34,42,49,.10), 0 3px 8px rgba(34,42,49,.07); border-inline-start: 5px solid var(--st-open); }
+.app .deal:last-child { margin-block-end: 0; }
+.app .deal:active { box-shadow: 0 1px 2px rgba(34,42,49,.10); transform: translateY(1px); }
+.app .deal.status-completed { border-inline-start-color: var(--st-done); }
+.app .deal.status-cancelled { border-inline-start-color: var(--st-cancelled); }
+.app .deal-link { display: block; text-decoration: none; color: inherit; cursor: pointer; }
+.app .deal-title { display: block; font-weight: 700; font-size: 17px; line-height: 1.3; color: var(--ink); }
+.app .deal-ref { font-weight: 600; font-size: 13.5px; color: var(--muted); margin-inline-start: 6px; font-variant-numeric: tabular-nums; }
+.app .deal-search { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 14px; }
+.app .deal-search .ds-q { flex: 1 1 220px; min-width: 0; padding: 9px 12px; border: 1px solid var(--line-strong); border-radius: 10px; font-size: 15px;
+  background: var(--card); color: var(--ink); margin: 0; width: auto; }
+.app .deal-search .ds-q:focus { outline: 2px solid var(--brand); outline-offset: 1px; border-color: var(--brand); }
+.app .deal-search .ds-date { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; color: var(--muted); margin: 0; }
+.app .deal-search .ds-date input { padding: 7px 9px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; color: var(--ink); background: var(--card);
+  margin: 0; min-height: 0; width: auto; }
+.app .deal-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-block-start: 7px; font-size: 13.5px; color: var(--muted); align-items: center; }
+.app .due { font-weight: 600; color: var(--ink); }
+.app .due.created { color: var(--muted); font-weight: 400; }
+.app .badge { background: #eef1f4; color: var(--slate); border-radius: 999px; padding: 2px 10px; font-size: 12.5px; font-weight: 600; }
+.app .deal.status-completed .badge { background: #dcf3e6; color: var(--ok); }
+.app .deal.status-cancelled { opacity: .72; }
+.app .delayed { background: var(--warn-bg); color: var(--warn-ink); border-radius: 999px; padding: 2px 10px; font-size: 13px; }
+.app .delayed-banner { background: var(--warn-bg); color: var(--warn-ink); border-radius: 10px; padding: 10px 12px; margin: 0 0 12px; }
+.app .owner { background: #f3f4f6; border-radius: 999px; padding: 2px 10px; }
+.app .deal-meta .amount { font-weight: 700; color: var(--ink); }
+.app .proposal-card { background: #f8fafb; border: 1.5px solid var(--line); border-radius: var(--radius); border-inline-start: 3px solid var(--slate);
+  padding: 12px 14px; margin: 8px 0 14px; }
+.app .pc-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-block-end: 10px; padding-block-end: 10px;
+  border-block-end: 1px solid var(--line); }
+.app .pc-customer { font-size: 16px; font-weight: 700; color: var(--ink); }
+.app .pc-amount { font-size: 21px; font-weight: 800; color: var(--slate); white-space: nowrap; }
+.app .pc-facts { display: flex; flex-wrap: wrap; gap: 12px 28px; }
+.app .pc-fact { display: flex; flex-direction: column; gap: 3px; }
+.app .pc-l { color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: .02em; }
+.app .pc-v { font-size: 16px; font-weight: 700; color: var(--ink); }
+.app .status-chip { display: inline-block; font-size: 13px; font-weight: 700; padding: 2px 10px; border-radius: 999px; }
+.app .status-chip.status-open { background: #e7edfb; color: #33488f; }
+.app .status-chip.status-completed { background: #dcf3e6; color: #1f7a3d; }
+.app .status-chip.status-cancelled { background: #eceef1; color: #5c6673; }
+.app .proposal-card .pdf-row { margin: 12px 0 0; padding-block-start: 10px; border-block-start: 1px solid var(--line); }
+.app .deal-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-block-start: 14px; padding-block-start: 14px; border-block-start: 1px solid var(--line); }
+.app .ghost { background: var(--card); color: var(--slate); border: 1px solid var(--line); border-radius: 10px; padding: 9px 14px; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.app .ghost:hover { background: #f1f4f7; }
+.app .note { border-block-end: 1px solid var(--line); padding: 10px 0; }
+.app .note p { margin: 0 0 4px; }
+.app .note-meta { font-size: 13px; color: var(--muted); }
+.app .timeline { list-style: none; margin: 0 0 14px; padding: 0; position: relative; }
+.app .timeline::before { content: ""; position: absolute; inset-block: 6px 6px; inset-inline-start: 6px; width: 2px; background: var(--line); border-radius: 2px; }
+.app .timeline > li { position: relative; padding-inline-start: 24px; padding-block: 7px; }
+.app .tl-dot { position: absolute; inset-inline-start: 1px; inset-block-start: 12px; width: 12px; height: 12px; border-radius: 50%; box-sizing: border-box; }
+.app .tl-event .tl-dot { background: var(--card); border: 2px solid #9aa6b2; }
+.app .tl-note .tl-dot { background: var(--brand); border: 2px solid var(--brand); }
+.app .tl-event { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.app .tl-event-body { font-size: 14px; color: #4a5560; }
+.app .tl-event-meta { font-size: 12px; color: var(--muted); }
+.app .tl-note .note { border-block-end: 0; padding: 8px 11px; background: color-mix(in srgb, var(--brand) 7%, #fff);
+  border-inline-start: 3px solid var(--brand); border-radius: 8px; }
+.app .tl-note .note p { font-size: 15.5px; line-height: 1.5; color: var(--ink); }
+.app .latest-note { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; margin-block-start: 8px; font-size: 14.5px; line-height: 1.45;
+  color: var(--ink); background: color-mix(in srgb, var(--brand) 7%, #fff); border-inline-start: 3px solid var(--brand); border-radius: 6px; padding: 7px 10px; overflow: hidden; }
+.app .tabs { display: flex; gap: 8px; margin-block-end: 14px; }
+.app .tab { flex: 1; min-height: 40px; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; background: #eef2f6; color: var(--muted); border: 1px solid var(--line); border-radius: 10px; }
+.app .tab.active { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
+.app .agent-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; margin-block-start: 4px; }
+.app .agent-card { background: var(--card); border: 1.5px solid var(--line); border-radius: var(--radius); padding: 12px 14px; }
+.app .ac-head { font-size: 15px; font-weight: 800; color: var(--slate); margin-block-end: 10px; border-inline-start: 3px solid var(--brand); padding-inline-start: 8px; }
+.app .ac-body { display: flex; align-items: center; gap: 14px; }
+.app .donut-wrap { position: relative; flex: 0 0 auto; width: 118px; height: 118px; }
+.app .donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
+.app .donut-total { font-size: 26px; font-weight: 800; color: var(--ink); line-height: 1; }
+.app .donut-total-lbl { font-size: 11px; color: var(--muted); margin-block-start: 2px; }
+.app .ac-legend { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; flex: 1 1 auto; }
+.app .ac-legend li { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--muted); }
+.app .ac-legend li b { margin-inline-start: auto; font-size: 15px; font-weight: 800; color: var(--ink); }
+.app .lg-dot { width: 10px; height: 10px; border-radius: 3px; flex: 0 0 auto; }
+.app .lg-open { background: var(--st-open); } .app .lg-done { background: var(--st-done); } .app .lg-cancelled { background: var(--st-cancelled); }
+.app .ac-stats { display: flex; gap: 8px; margin-block-start: 12px; padding-block-start: 10px; border-block-start: 1px solid var(--line); }
+.app .ac-stat { flex: 1; text-align: center; }
+.app .acs-val { display: block; font-size: 16px; font-weight: 800; color: var(--ink); }
+.app .ac-stat-warn .acs-val { color: var(--brand); }
+.app .acs-lbl { display: block; font-size: 11px; color: var(--muted); margin-block-start: 1px; }
+.app .label-hint { font-weight: 400; font-size: 12px; color: var(--muted); }
+.app .empty { color: var(--muted); }
+.app .back { display: inline-block; margin-block-end: 12px; color: var(--brand); text-decoration: none; cursor: pointer; font-weight: 600; }
+.app .wa-row { margin: 4px 0 12px; }
+.app .wa-link { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: #25d366; color: #04361a; border-radius: 999px;
+  font-weight: 600; font-size: 14px; text-decoration: none; cursor: default; }
+.app .outcome-form { margin: 4px 0 16px; padding: 14px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); }
+.app .outcome-h { margin: 0 0 12px; font-size: 16px; }
+.app .outcome-choices { display: flex; flex-direction: column; gap: 8px; }
+.app .oc-block { border: 1.5px solid var(--line); border-radius: var(--radius); overflow: hidden; transition: border-color .12s, box-shadow .12s;
+  --oc: var(--brand); --oc-tint: color-mix(in srgb, var(--brand) 8%, #fff); }
+.app .oc { display: flex; align-items: center; gap: 10px; min-height: 48px; margin: 0; padding: 12px 14px; font-size: 16px; font-weight: 600; color: var(--ink);
+  cursor: pointer; user-select: none; transition: background .12s, transform .06s; }
+.app .oc input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; min-height: 0; padding: 0; }
+.app .oc .ic { font-size: 20px; }
+.app .oc-completed { --oc: var(--ok); --oc-tint: #eaf7ef; }
+.app .oc-reschedule { --oc: var(--brand); --oc-tint: color-mix(in srgb, var(--brand) 9%, #fff); }
+.app .oc-cancelled { --oc: var(--danger); --oc-tint: #fdecec; }
+@media (hover: hover) {
+  .app .oc-block:hover { border-color: var(--oc); box-shadow: 0 1px 6px color-mix(in srgb, var(--oc) 22%, transparent); }
+  .app .oc:hover { background: var(--oc-tint); }
+}
+.app .oc:active { transform: scale(.99); }
+.app .oc-block:has(input:checked) { border-color: var(--oc); box-shadow: inset 0 0 0 1px var(--oc); }
+.app .oc-block:has(input:checked) .oc { background: var(--oc-tint); }
+.app .oc-block:has(input:focus-visible) { outline: 2px solid var(--oc); outline-offset: 2px; }
+.app .oc-fields { display: flex; flex-direction: column; gap: 10px; padding: 14px; background: #fafbfc; border-block-start: 1px solid var(--line); }
+.app .oc-fields[hidden] { display: none; }
+.app .outcome-form .primary { margin-block-start: 14px; width: 100%; }
+.app .outcome-form .primary:disabled { opacity: .5; cursor: not-allowed; }
+.app .req { color: var(--danger); font-weight: 700; }
+.app .manager-edit { margin: 16px 0 4px; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.app .manager-edit > summary { cursor: pointer; user-select: none; list-style: none; display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 16px; background: #f0f3f7; color: var(--slate); font-size: 15px; font-weight: 800; }
+.app .manager-edit > summary::-webkit-details-marker { display: none; }
+.app .manager-edit > summary:hover { background: #e8edf3; }
+.app .manager-edit[open] > summary { border-block-end: 1px solid var(--line); }
+.app .me-caret { font-size: 13px; color: var(--brand); transition: transform .15s; }
+.app .manager-edit[open] .me-caret { transform: rotate(180deg); }
+.app .manager-edit > form { padding: 14px 16px; }
+.app .pdf-row { margin: 4px 0 14px; color: var(--muted); font-size: 14px; }
+.app .pdf-view .pdf-row { margin-block-end: 8px; }
+.app .pdf-open { margin-inline-start: 8px; color: var(--brand); font-weight: 600; cursor: default; }
+.app .inquiry h1 { font-size: 22px; font-weight: 800; color: var(--slate); margin: 0 0 4px; }
+.app .inquiry-lede { margin: 0 0 20px; font-size: 15px; color: var(--muted); line-height: 1.45; }
+.app .inquiry-sent { margin: 0 0 18px; padding: 12px 14px; font-size: 15.5px; font-weight: 600; color: #1f7a3d; background: #eaf7ef;
+  border-inline-start: 3px solid var(--ok); border-radius: 8px; }
+.app .inquiry form label { display: block; margin: 0 0 6px; font-size: 15.5px; font-weight: 700; color: var(--ink); }
+.app .inquiry form input, .app .inquiry form textarea { margin: 0 0 20px; min-height: 52px; font-size: 17px; padding: 12px 14px; border-radius: var(--radius); }
+.app .inquiry form textarea { min-height: 108px; line-height: 1.45; resize: vertical; }
+.app .inquiry form .primary { min-height: 52px; font-size: 17.5px; margin-block-start: 4px; }
+.app .ic { display: inline-block; width: 1.05em; height: 1.05em; vertical-align: -0.15em; background-color: currentColor;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-position: center; mask-position: center;
+  -webkit-mask-size: contain; mask-size: contain; flex: 0 0 auto; }
+.app .ic-check { -webkit-mask-image: var(--ic-check); mask-image: var(--ic-check); }
+.app .ic-reschedule { -webkit-mask-image: var(--ic-reschedule); mask-image: var(--ic-reschedule); }
+.app .ic-cancel { -webkit-mask-image: var(--ic-cancel); mask-image: var(--ic-cancel); }
+.app .ic-pdf { -webkit-mask-image: var(--ic-pdf); mask-image: var(--ic-pdf); }
+.app .ic-archive { -webkit-mask-image: var(--ic-archive); mask-image: var(--ic-archive); }
+.app .ic-pencil { -webkit-mask-image: var(--ic-pencil); mask-image: var(--ic-pencil); }
+.app .oc .ic-check { color: var(--ok); } .app .oc .ic-cancel { color: var(--danger); } .app .oc .ic-reschedule { color: var(--brand); }
+/* demo-only: the flash line after a save, and the mock proposal document standing in for the PDF viewer */
+.app .flash { margin: 0 0 12px; padding: 10px 12px; font-size: 15px; font-weight: 600; color: #1f7a3d; background: #eaf7ef; border-inline-start: 3px solid var(--ok); border-radius: 8px; }
+.app .paper { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; font-size: 13.5px; color: #333; line-height: 1.5;
+  box-shadow: inset 0 -30px 30px -30px rgba(0,0,0,.08); max-height: 300px; overflow: hidden; }
+.app .paper .p-top { display: flex; justify-content: space-between; gap: 12px; border-bottom: 2px solid #333; padding-bottom: 8px; margin-bottom: 10px; }
+.app .paper .p-title { font-size: 16px; font-weight: 800; }
+.app .paper table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+.app .paper th, .app .paper td { text-align: start; padding: 5px 6px; border-bottom: 1px solid #e3e6ea; }
+.app .paper th { font-weight: 700; background: #f4f5f7; }
+.app .paper td.n { text-align: end; font-variant-numeric: tabular-nums; }
+.app .paper .p-total { display: flex; justify-content: space-between; margin-top: 10px; font-weight: 800; font-size: 14.5px; }
+/* email views */
+.app .mailhead { background: #fff; border-bottom: 1px solid var(--line); padding: 12px 16px; font-size: 14px; color: var(--muted); display: grid; gap: 3px; }
+.app .mailhead b { color: var(--ink); font-weight: 700; }
+.app .mailhead .subj { font-size: 17px; font-weight: 800; color: var(--ink); margin-bottom: 4px; }
+.app .mail-wrap { overflow-x: auto; }
+.app .mail-btn { cursor: pointer; }
+
+.case-nav { border-bottom: 1px solid var(--pg-line); background: color-mix(in srgb, var(--pg-surface) 85%, transparent); backdrop-filter: blur(8px); position: sticky; top: 0; z-index: 30; }
+.case-nav-inner { max-width: 1200px; margin-inline: auto; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 13.5px; }
+.case-back { font-weight: 600; color: var(--pg-ink); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.case-back:hover { color: var(--accent-text); }
+.lang-switch { display: inline-flex; align-items: center; gap: 6px; font-family: var(--f-mono); font-size: 12px; color: var(--pg-muted); }
+.lang-switch a, .lang-switch span.active { padding: 4px 10px; border-radius: 999px; text-decoration: none; font-family: var(--f-body); font-weight: 600; font-size: 12.5px; }
+.lang-switch span.active { background: var(--pg-ink); color: var(--pg-bg); }
+.lang-switch a { background: var(--pg-surface); color: var(--pg-ink); border: 1px solid var(--pg-line); }
+.lang-switch a:hover { border-color: var(--pg-muted); }
+</style>
+
+<nav class="case-nav" aria-label="Case study navigation">
+  <div class="case-nav-inner">
+    <a class="case-back" href="https://saarshoshan24.github.io/">← Saar Shoshan Portfolio</a>
+    <div class="lang-switch" role="group" aria-label="Demo interface language">
+      <span>App UI:</span>
+      <span class="active" aria-current="page">English (LTR)</span>
+      <a href="https://saarshoshan24.github.io/email-to-deal-tracker/he/">עברית (Original RTL)</a>
+    </div>
+  </div>
+</nav>
+<div class="wrap">
+  <header class="hero">
+    <p class="eyebrow">Case study · Email-to-Deal Tracker</p>
+    <h1 class="pg">No price quote gets forgotten.</h1>
+    <p class="lede">A small business emailed price quotes to customers, then lost track of which ones anyone followed up on. I built an app that <em>turns every quote email into a deal</em> for the right salesperson, reminds them to follow up, and sends the manager a weekly summary. Nobody had to change how they work, and it has run their sales follow-up every day since July 2026.</p>
+    <dl class="facts">
+      <div><dt>My role</dt><dd>Solo<small>design, build, launch, support</small></dd></div>
+      <div><dt>In daily use</dt><dd>Since Jul 2026<small>by a manager and sales team</small></dd></div>
+      <div><dt>Running cost</dt><dd>≈ $10 / year<small>no servers to rent</small></dd></div>
+      <div><dt>Built for</dt><dd>Mobile &amp; Web<small>English LTR &amp; <a href="https://saarshoshan24.github.io/email-to-deal-tracker/he/">Hebrew RTL</a></small></dd></div>
+    </dl>
+  </header>
+
+  <section class="demo" aria-label="Interactive demo">
+    <aside class="panel">
+      <div class="ctl ctl-view">
+        <span class="ctl-label" id="lbl-view">Screen</span>
+        <div class="seg" role="group" aria-labelledby="lbl-view" id="viewSeg">
+          <button type="button" data-view="list" aria-pressed="true">Deals</button>
+          <button type="button" data-view="detail" aria-pressed="false">Deal page</button>
+          <button type="button" data-view="nudge" aria-pressed="false">Agent reminder</button>
+          <button type="button" data-view="weekly" aria-pressed="false">Weekly report</button>
+        </div>
+      </div>
+      <div class="ctl ctl-dev">
+        <span class="ctl-label" id="lbl-dev">Width</span>
+        <div class="seg" role="group" aria-labelledby="lbl-dev" id="devSeg">
+          <button type="button" data-dev="desktop" aria-pressed="true">Desktop</button>
+          <button type="button" data-dev="phone" aria-pressed="false">Phone</button>
+        </div>
+      </div>
+      <div class="ctl ctl-brand">
+        <span class="ctl-label" id="lbl-brand">Try another brand</span>
+        <div class="swatches" role="group" aria-labelledby="lbl-brand" id="brandSeg"></div>
+        <p class="brand-note">One product, any brand. Each client gets their own logo and colors with no code changes.</p>
+      </div>
+      <div class="ctl ctl-notes">
+        <div class="ctl-head">
+          <span class="ctl-label">What to look at</span>
+          <span class="find-pill"><i class="find-ic" aria-hidden="true"></i><span class="hover-only">Hover to find it in the app</span><span class="touch-only">Tap to find it in the app</span></span>
+        </div>
+        <ol class="notes-list" id="notes"></ol>
+        <p class="hint-line"><span class="hover-only">Click a note to keep it highlighted.</span><span class="touch-only">Tap again to clear the highlight.</span></p>
+      </div>
+    </aside>
+
+    <div class="device">
+      <div class="browser" id="browser">
+        <div class="chrome" aria-hidden="true">
+          <span class="dots"><i></i><i></i><i></i></span>
+          <span class="url" id="url">tracker.example.com<b>/</b></span>
+        </div>
+        <div class="screen" id="screen">
+          <div class="app" id="app" dir="ltr" lang="en"></div>
+        </div>
+      </div>
+      <p class="caption">A working demo with invented data. Open a deal and save an outcome. <a href="#" id="resetDemo">Reset</a></p>
+    </div>
+  </section>
+</div>
+
+<div class="wrap">
+  <section class="block" aria-labelledby="h-flow">
+    <div class="block-head">
+      <p class="eyebrow">How it works</p>
+      <h2 class="pg" id="h-flow">Fits the way the team already works</h2>
+      <p>Nobody had to change habits. The app works around the email the manager was already sending.</p>
+    </div>
+    <ol class="flow">
+      <li><span class="num">01</span><b>A quote goes out</b><span>The manager emails a price quote, same as always.</span></li>
+      <li><span class="num">02</span><b>It becomes a deal</b><span>The app picks it up, reads the customer and amount, and assigns the right salesperson.</span></li>
+      <li><span class="num">03</span><b>A timely reminder</b><span>Four days later the salesperson gets a reminder that links straight to the deal.</span></li>
+      <li><span class="num">04</span><b>One tap to update</b><span>Closed, needs follow-up, or cancelled. Cancellations alert the manager right away.</span></li>
+      <li><span class="num">05</span><b>A weekly summary</b><span>Every Sunday the manager gets each salesperson's numbers in one email.</span></li>
+    </ol>
+  </section>
+
+  <section class="block" aria-labelledby="h-inc">
+    <div class="block-head">
+      <p class="eyebrow">In production</p>
+      <h2 class="pg" id="h-inc">Problems I solved after launch</h2>
+    </div>
+    <div class="incidents">
+      <article class="inc">
+        <h3 class="pg">Deals that silently went missing</h3>
+        <dl><dt>Problem</dt><dd>A few quote emails never became deals, and nothing showed an error.</dd>
+            <dt>What I did</dt><dd>Traced it to how the app decided which emails were new, and rebuilt that step so an email can't be skipped.</dd></dl>
+      </article>
+      <article class="inc">
+        <h3 class="pg">Reminders that never arrived</h3>
+        <dl><dt>Problem</dt><dd>The app reported reminders as sent, but a salesperson never got them.</dd>
+            <dt>What I did</dt><dd>Tested step by step until I found the recipient's company mail filter holding them, instead of trusting the green checkmark.</dd></dl>
+      </article>
+      <article class="inc">
+        <h3 class="pg">Recovering after data loss</h3>
+        <dl><dt>Problem</dt><dd>The office installation was wiped.</dd>
+            <dt>What I did</dt><dd>Rebuilt every deal from the mailbox, then caught that their reminders weren't switched on and fixed that too.</dd></dl>
+      </article>
+      <article class="inc">
+        <h3 class="pg">Design from real feedback</h3>
+        <dl><dt>Problem</dt><dd>The manager missed notes he had written, and deals blurred together in the list.</dd>
+            <dt>What I did</dt><dd>Watched how he actually used it and redesigned both. Every screen here went through rounds like that.</dd></dl>
+      </article>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="h-dec">
+    <div class="block-head">
+      <p class="eyebrow">For your team</p>
+      <h2 class="pg" id="h-dec">What I'd bring to your product</h2>
+    </div>
+    <div class="decisions">
+      <div class="dec">
+        <h3 class="pg">Tools people actually adopt</h3>
+        <p>I start from how people already work. Here the manager's routine didn't change at all.</p>
+        <p class="over"><b>For you:</b> internal tools and products your team uses without training.</p>
+      </div>
+      <div class="dec">
+        <h3 class="pg">Design driven by users</h3>
+        <p>Every change came from watching the manager and salespeople use it, not from guesses.</p>
+        <p class="over"><b>For you:</b> interfaces that improve with real feedback.</p>
+      </div>
+      <div class="dec">
+        <h3 class="pg">One product, many brands</h3>
+        <p>The same app can be restyled for another business with its own logo and colors, with no code changes. Try the brand switcher above.</p>
+        <p class="over"><b>For you:</b> white-label and multi-brand products.</p>
+      </div>
+      <div class="dec">
+        <h3 class="pg">Hebrew and mobile, done properly</h3>
+        <p>Built right-to-left from the start for salespeople on phones and tablets.</p>
+        <p class="over"><b>For you:</b> localized products that feel native, not translated.</p>
+      </div>
+      <div class="dec">
+        <h3 class="pg">Emails that look right everywhere</h3>
+        <p>Branded reminders and reports that display correctly in Gmail, Outlook and phone mail apps.</p>
+        <p class="over"><b>For you:</b> customer and marketing emails that match your brand.</p>
+      </div>
+      <div class="dec">
+        <h3 class="pg">From idea to a running product</h3>
+        <p>I designed, built, launched and support it. It has run every day since July 2026 for about $10 a year.</p>
+        <p class="over"><b>For you:</b> someone who ships, and keeps it working after launch.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="pg-foot">
+    <p class="built"><b>Built with</b> Python · FastAPI · HTML/CSS · htmx · SQLite · email automation · Cloudflare</p>
+    <p>All customers, names, amounts and brands shown are invented. The interface and its behavior are taken from the real app. No client data is included.</p>
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ── icons (Bootstrap Icons, MIT), same set the app vendors ── */
+  const ICONS = {
+    check: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="m10.97 4.97-.02.022-3.473 4.425-2.093-2.094a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05"/></svg>',
+    reschedule: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5z"/><path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/></svg>',
+    cancel: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/></svg>',
+    pdf: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M4.5 3a2.5 2.5 0 0 1 5 0v9a1.5 1.5 0 0 1-3 0V5a.5.5 0 0 1 1 0v7a.5.5 0 0 0 1 0V3a1.5 1.5 0 1 0-3 0v9a2.5 2.5 0 0 0 5 0V5a.5.5 0 0 1 1 0v7a3.5 3.5 0 1 1-7 0z"/></svg>',
+    archive: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M0 2a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1v7.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 12.5V5a1 1 0 0 1-1-1zm2 3v7.5A1.5 1.5 0 0 0 3.5 14h9a1.5 1.5 0 0 0 1.5-1.5V5zm13-3H1v2h14zM5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5"/></svg>',
+    pencil: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325"/></svg>'
+  };
+  const rootStyle = document.documentElement.style;
+  Object.keys(ICONS).forEach(k => rootStyle.setProperty('--ic-' + k, 'url("data:image/svg+xml,' + encodeURIComponent(ICONS[k]) + '")'));
+
+  /* ── brands (invented) ── */
+  const BRANDS = {
+    harbor: { name: 'Harbor Services', letter: 'H', color: '#0E7C86', press: '#0A636B', slate: '#243240', email: { primary: '#1F3A4D', accent: '#0E7C86', bg: '#E6F1F2' } },
+    ember:  { name: 'Ember Works',     letter: 'E', color: '#D4561A', press: '#B24614', slate: '#2F3A44', email: { primary: '#33404B', accent: '#D4561A', bg: '#F6EEE8' } },
+    plum:   { name: 'Plum & Co.',      letter: 'P', color: '#7A4FB5', press: '#643F97', slate: '#2A2838', email: { primary: '#3A2E5C', accent: '#7A4FB5', bg: '#F0ECF7' } }
+  };
+
+  /* ── sample data (invented, English LTR edition) ── */
+  const TODAY = '2026-09-28';
+  const MANAGER = { name: 'Rotem Cohen' };
+  const AGENTS = { 2: 'Dana Levy', 3: 'Yoav Mizrahi', 4: 'Michal Avraham' };
+  const NUDGE_DAYS = 4;
+
+  function seed() {
+    const mk = (o) => Object.assign({ archived: false, followOrig: null, follow: null, notes: [], phone: null, completedOn: null, editor: null }, o);
+    return [
+      mk({ id: 31, ref: '10482', customer: 'Palm Grove Events', amount: 18400, agent: 2, status: 'open', created: '2026-09-15', follow: '2026-10-04', followOrig: '2026-09-22', editor: 'Dana Levy', phone: '050-0000000',
+           notes: [ { kind: 'event', body: 'Agent follow-up reminder sent', author: 'System', at: '2026-09-19 16:00' },
+                    { kind: 'event', body: 'Follow-up date updated: 22/09/2026 → 04/10/2026', author: 'Dana Levy', at: '2026-09-21 11:42' },
+                    { kind: 'note',  body: 'Client asked to reconnect after the holidays. Call scheduled for Oct 4 — wants to finalize before year-end.', author: 'Dana Levy', at: '2026-09-21 11:42' } ] }),
+      mk({ id: 34, ref: '10491', customer: 'Fieldstone Bakery', amount: 6250, agent: 3, status: 'open', created: '2026-09-24', follow: '2026-09-30' }),
+      mk({ id: 35, ref: '10495', customer: 'Oren Design Studio', amount: 9800, agent: 4, status: 'open', created: '2026-09-18', follow: '2026-09-25',
+           notes: [ { kind: 'event', body: 'Agent follow-up reminder sent', author: 'System', at: '2026-09-22 16:00' } ] }),
+      mk({ id: 36, ref: '10498', customer: 'Sharon Auto Service', amount: 5400, agent: 3, status: 'open', created: '2026-09-20', follow: '2026-10-06',
+           notes: [ { kind: 'event', body: 'Agent follow-up reminder sent', author: 'System', at: '2026-09-24 16:00' } ] }),
+      mk({ id: 37, ref: '10503', customer: 'Horizon Sports Center', amount: 12000, agent: null, status: 'open', created: '2026-09-27' }),
+      mk({ id: 38, ref: '10507', customer: 'Nitzanim Academy', amount: 4900, agent: 2, status: 'open', created: '2026-09-26' }),
+      mk({ id: 22, ref: '10455', customer: 'Nahal Logistics Ltd.', amount: 22300, agent: 3, status: 'completed', created: '2026-09-08', follow: '2026-09-16', completedOn: '2026-09-23' }),
+      mk({ id: 25, ref: '10461', customer: 'Colony Roasters Cafe', amount: 3100, agent: 4, status: 'cancelled', created: '2026-09-10', follow: '2026-09-18',
+           notes: [ { kind: 'event', body: 'Deal cancelled', author: 'Michal Avraham', at: '2026-09-24 09:15' },
+                    { kind: 'note', body: 'Client selected a lower-priced vendor.', author: 'Michal Avraham', at: '2026-09-24 09:15' } ] }),
+      mk({ id: 27, ref: '10470', customer: 'Barak & Co. Law Offices', amount: 7600, agent: 2, status: 'completed', created: '2026-09-11', follow: '2026-09-19', completedOn: '2026-09-25' })
+    ];
+  }
+
+  let deals = seed();
+  const state = { view: 'list', dealId: 31, sub: 'open', q: '', archive: false, brand: 'harbor', dev: 'desktop', flash: '', inquirySent: false };
+
+  /* ── helpers ── */
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const ildate = (s) => { if (!s) return ''; const [y, m, d] = s.slice(0, 10).split('-'); return d + '/' + m + '/' + y; };
+  const ils = (n) => n == null ? '' : '$' + Math.round(n).toLocaleString('en-US');
+  const toDate = (s) => new Date(s.slice(0, 10) + 'T00:00:00');
+  const addDays = (s, n) => { const t = toDate(s); t.setDate(t.getDate() + n); return t.toISOString().slice(0, 10); };
+  const dayDiff = (a, b) => Math.round((toDate(a) - toDate(b)) / 86400000);
+  const STATUS_EN = { open: 'Open', completed: 'Completed', cancelled: 'Cancelled' };
+  const title = (d) => 'Quote #' + d.ref + ' – ' + d.customer;
+  const agentName = (id) => id ? AGENTS[id] : null;
+  const nudgeAt = (d) => d.nudgeAt || addDays(d.created, NUDGE_DAYS);
+  const isDelayed = (d) => !!(d.followOrig && d.follow && d.followOrig !== d.follow);
+  const isOverdue = (d) => d.status === 'open' && d.follow && d.follow < TODAY;
+  const byId = (id) => deals.find(d => d.id === id);
+  const latestNote = (d) => { const n = d.notes.filter(x => x.kind === 'note'); return n.length ? n[n.length - 1].body : null; };
+  const brand = () => BRANDS[state.brand];
+
+  function logo(size) {
+    const b = brand();
+    return '<svg class="brand-logo" width="' + size + '" height="' + size + '" viewBox="0 0 28 28" aria-hidden="true">' +
+      '<rect width="28" height="28" rx="7" fill="' + b.color + '"/>' +
+      '<text x="14" y="19.5" text-anchor="middle" font-family="Rubik, Arial, sans-serif" font-size="15" font-weight="700" fill="#fff">' + b.letter + '</text></svg>';
+  }
+
+  /* ── donut: port of the Jinja macro (stroke-dash arcs, 2px gap between slices) ── */
+  function donut(o, c, x) {
+    const total = o + c + x, circ = 326.726, gap = total > 1 ? 2 : 0;
+    const cs = getComputedStyle(appEl);
+    const colors = { open: cs.getPropertyValue('--st-open').trim(), completed: cs.getPropertyValue('--st-done').trim(), cancelled: cs.getPropertyValue('--st-cancelled').trim() };
+    let arcs = '';
+    if (total === 0) arcs = '<circle cx="60" cy="60" r="52" fill="none" stroke="#e6ebf4" stroke-width="15"/>';
+    else {
+      let offset = 0;
+      [['open', o], ['completed', c], ['cancelled', x]].forEach(([name, val]) => {
+        if (val <= 0) return;
+        const frac = val / total; let arc = circ * frac - gap; if (arc <= 0) arc = 0.5;
+        arcs += '<circle cx="60" cy="60" r="52" fill="none" stroke="' + colors[name] + '" stroke-width="15" stroke-dasharray="' + arc.toFixed(2) + ' ' + (circ - arc).toFixed(2) + '" stroke-dashoffset="' + (-offset).toFixed(2) + '"/>';
+        offset += circ * frac;
+      });
+    }
+    return '<svg viewBox="0 0 120 120" width="118" height="118" role="img" aria-label="Status breakdown: ' + o + ' open, ' + c + ' completed, ' + x + ' cancelled" style="transform:rotate(-90deg)">' + arcs + '</svg>' +
+      '<div class="donut-center"><span class="donut-total">' + total + '</span><span class="donut-total-lbl">deals</span></div>';
+  }
+
+  /* ── app chrome ── */
+  function chrome(inner, activeTab) {
+    const b = brand();
+    const tab = (key, label) => '<button type="button" class="app-tab' + (activeTab === key ? ' active' : '') + '" data-nav="' + key + '">' + label + '</button>';
+    return '<header class="topbar"><span class="brand">' + logo(28) + esc(b.name) + '</span><span class="who">' + esc(MANAGER.name) + '</span><span class="logout">Sign out</span></header>' +
+      '<nav class="app-tabs" aria-label="Main navigation"><div class="app-tabs-inner">' + tab('deals', 'Deals') + tab('inquiry', 'Field Inquiry') + tab('archive', 'Archive') + '</div></nav>' +
+      '<main class="container"><p class="greeting">Hello ' + esc(MANAGER.name.split(' ')[0]) + '</p>' + (state.flash ? '<p class="flash" role="status">' + esc(state.flash) + '</p>' : '') + inner + '</main>';
+  }
+
+  function dealItem(d) {
+    const owner = d.agent ? '<span class="owner">' + esc(agentName(d.agent)) + '</span>' : '<span class="owner unassigned">⚠ Unassigned</span>';
+    let due;
+    if (d.follow) {
+      due = '<span class="due">Due: ' + ildate(d.follow) + '</span>';
+      if (isDelayed(d)) due += '<span class="delayed" title="Rescheduled from original date ' + ildate(d.followOrig) + '">⚠ Rescheduled (orig: ' + ildate(d.followOrig) + (d.editor ? ', by ' + esc(d.editor) : '') + ')</span>';
+    } else due = '<span class="due created">Created: ' + ildate(d.created) + '</span>';
+    const ln = latestNote(d);
+    return '<li class="deal status-' + d.status + '" data-deal="' + d.id + '"><a class="deal-link" href="#" data-open="' + d.id + '">' +
+      '<span class="deal-title" dir="auto" title="' + esc(title(d)) + '">' + esc(d.customer) + ' <span class="deal-ref" dir="ltr">#' + d.ref + '</span></span>' +
+      '<span class="deal-meta">' + due + owner + (d.amount != null ? '<span class="amount" dir="ltr">' + ils(d.amount) + '</span>' : '') + '<span class="badge">' + STATUS_EN[d.status] + '</span></span>' +
+      (ln ? '<span class="latest-note" dir="auto">📝 ' + esc(ln) + '</span>' : '') + '</a></li>';
+  }
+
+  function listView() {
+    const pool = deals.filter(d => d.archived === state.archive);
+    const q = state.q.trim().toLowerCase();
+    const shown = q ? pool.filter(d => (d.customer + ' ' + title(d) + ' ' + d.ref).toLowerCase().includes(q)) : pool;
+    const open = shown.filter(d => d.status === 'open'), closed = shown.filter(d => d.status !== 'open');
+    const active = deals.filter(d => !d.archived);
+    let html = '';
+    if (!state.archive) {
+      const mix = { open: 0, completed: 0, cancelled: 0 }; active.forEach(d => mix[d.status]++);
+      const overdue = active.filter(isOverdue).length;
+      html += '<section class="overview" id="ovStatus"><div class="ov-status"><span class="ov-label">Status:</span>' +
+        '<span class="ov-stat"><b>' + mix.open + '</b> Open</span><span class="ov-stat"><b>' + mix.completed + '</b> Completed</span><span class="ov-stat"><b>' + mix.cancelled + '</b> Cancelled</span>' +
+        (overdue ? '<span class="ov-stat ov-overdue"><b>' + overdue + '</b> Overdue</span>' : '') + '</div></section>';
+      const cards = Object.keys(AGENTS).map(id => {
+        id = +id; const mine = active.filter(d => d.agent === id);
+        const o = mine.filter(d => d.status === 'open').length, c = mine.filter(d => d.status === 'completed').length, x = mine.filter(d => d.status === 'cancelled').length;
+        const ov = mine.filter(isOverdue).length;
+        const amt = mine.filter(d => d.status === 'completed' && d.amount != null).reduce((s, d) => s + d.amount, 0);
+        return '<article class="agent-card"><header class="ac-head">' + esc(AGENTS[id]) + '</header><div class="ac-body"><div class="donut-wrap">' + donut(o, c, x) + '</div>' +
+          '<ul class="ac-legend"><li><span class="lg-dot lg-open"></span>Open<b>' + o + '</b></li><li><span class="lg-dot lg-done"></span>Completed<b>' + c + '</b></li><li><span class="lg-dot lg-cancelled"></span>Cancelled<b>' + x + '</b></li></ul></div>' +
+          '<footer class="ac-stats"><div class="ac-stat"><span class="acs-val">' + mine.length + '</span><span class="acs-lbl">Total</span></div>' +
+          '<div class="ac-stat' + (ov ? ' ac-stat-warn' : '') + '"><span class="acs-val">' + ov + '</span><span class="acs-lbl">Overdue</span></div>' +
+          '<div class="ac-stat"><span class="acs-val" dir="ltr">' + (c ? ils(amt) : '—') + '</span><span class="acs-lbl">Won Value</span></div></footer></article>';
+      }).join('');
+      html += '<section class="overview overview-cards" id="ovCards"><span class="ov-label">Deals by Salesperson:</span><div class="agent-cards">' + cards + '</div></section>';
+    }
+    html += '<section><h1 class="visually-hidden">' + (state.archive ? 'Archive' : 'Deals') + '</h1>' +
+      '<form class="deal-search" role="search" id="searchForm"><input class="ds-q" id="dsq" name="q" type="search" dir="auto" value="' + esc(state.q) + '" placeholder="Search by customer name or quote #…" aria-label="Search deals">' +
+      '<label class="ds-date">From<input name="date_from" type="date" aria-label="From date"></label><label class="ds-date">To<input name="date_to" type="date" aria-label="To date"></label></form>' +
+      '<div id="deal-list"><div class="tabs" role="tablist"><button type="button" class="tab' + (state.sub === 'open' ? ' active' : '') + '" data-sub="open">Open (' + open.length + ')</button>' +
+      '<button type="button" class="tab' + (state.sub === 'closed' ? ' active' : '') + '" data-sub="closed">Completed / Cancelled (' + closed.length + ')</button></div>';
+    const list = state.sub === 'open' ? open : closed;
+    html += list.length ? '<ul class="deals">' + list.map(dealItem).join('') + '</ul>'
+      : '<p class="empty">' + (state.archive ? 'No archived deals.' : state.sub === 'open' ? 'No open deals.' : 'No completed or cancelled deals.') + '</p>';
+    html += '</div></section>';
+    return chrome(html, state.archive ? 'archive' : 'deals');
+  }
+
+  function detailView() {
+    const d = byId(state.dealId);
+    const agent = agentName(d.agent);
+    let nudgeFact = '';
+    if (d.status === 'open' && d.agent) {
+      const n = dayDiff(nudgeAt(d), TODAY);
+      const txt = n > 1 ? 'In ' + n + ' days' : n === 1 ? 'Tomorrow' : n === 0 ? 'Today' : '<span class="unassigned">Sent ' + (-n) + ' days ago</span>';
+      nudgeFact = '<div class="pc-fact"><span class="pc-l">Agent Reminder</span><span class="pc-v">' + txt + '</span></div>';
+    }
+    const items = [['Annual Service & Maintenance Package', 1, Math.round(d.amount * 0.55)], ['On-Site Installation & Setup', 1, Math.round(d.amount * 0.25)], ['Hardware & Materials', 1, 0]];
+    const net = Math.round(d.amount / 1.18);
+    items[2][2] = net - items[0][2] - items[1][2];
+    const paper = '<div class="paper" id="pdfDoc" aria-label="Sample price quote preview"><div class="p-top"><div><div class="p-title">Price Quote #' + d.ref + '</div><div>Date: ' + ildate(d.created) + '</div></div><div style="text-align:end">' + esc(brand().name) + '<br>Reg. # 000000000</div></div>' +
+      '<div>To: <b id="pdfCustomer">' + esc(d.customer) + '</b></div>' +
+      '<table><thead><tr><th>Item</th><th>Qty</th><th style="text-align:end">Amount</th></tr></thead><tbody>' +
+      items.map(r => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td><td class="n" dir="ltr">' + ils(r[2]) + '</td></tr>').join('') + '</tbody></table>' +
+      '<div class="p-total"><span>Total Due (incl. Tax)</span><span id="pdfTotal" dir="ltr">' + ils(d.amount) + '</span></div></div>';
+
+    let html = '<a class="back" href="#" data-back="1">← Back to deals</a><section class="deal-edit"><h1 dir="auto">' + esc(title(d)) + '</h1>' +
+      '<div class="proposal-card" id="propCard"><div class="pc-head"><span class="pc-customer" dir="auto">' + esc(d.customer) + '</span>' + (d.amount != null ? '<span class="pc-amount" dir="ltr">' + ils(d.amount) + '</span>' : '') + '</div>' +
+      '<div class="pc-facts"><div class="pc-fact"><span class="pc-l">Owner</span><span class="pc-v">' + (agent ? esc(agent) : '<span class="unassigned">⚠ Unassigned</span>') + '</span></div>' +
+      '<div class="pc-fact"><span class="pc-l">Follow-Up Date</span><span class="pc-v" dir="ltr">' + (ildate(d.follow) || '—') + '</span></div>' +
+      '<div class="pc-fact"><span class="pc-l">Status</span><span class="pc-v"><span class="status-chip status-' + d.status + '">' + STATUS_EN[d.status] + '</span></span></div>' + nudgeFact +
+      '<div class="pc-fact"><span class="pc-l">Quote #</span><span class="pc-v" dir="ltr">' + d.ref + '</span></div></div>' +
+      '<div class="pdf-view" id="pdfView"><p class="pdf-row"><i class="ic ic-pdf" aria-hidden="true"></i> Price quote captured from inbound email. <span class="pdf-open" id="pdfOpen">Open quote in new tab</span></p>' + paper + '</div></div>';
+    if (isDelayed(d)) html += '<p class="delayed-banner">⚠ Follow-up date rescheduled from ' + ildate(d.followOrig) + (d.editor ? ' (updated by ' + esc(d.editor) + ')' : '') + '</p>';
+    if (d.status === 'open') {
+      html += '<form class="outcome-form" id="outcomeForm" novalidate><h2 class="outcome-h">Update Deal Status</h2><div class="outcome-choices">' +
+        '<div class="oc-block oc-completed"><label class="oc"><input type="radio" name="outcome" value="completed"> <i class="ic ic-check" aria-hidden="true"></i> Completed (Handed to Fulfillment)</label></div>' +
+        '<div class="oc-block oc-reschedule"><label class="oc"><input type="radio" name="outcome" value="reschedule"> <i class="ic ic-reschedule" aria-hidden="true"></i> Schedule Follow-Up (New Date)</label>' +
+        '<div class="oc-fields" data-for="reschedule" hidden><label>New follow-up date <span class="req">*</span> <span class="label-hint">(dd/mm/yyyy)</span><input type="date" id="oc_date" name="new_date" data-req disabled></label>' +
+        '<label>Reason for rescheduling <span class="label-hint">(optional)</span><textarea name="note" id="oc_rnote" dir="auto" rows="2" placeholder="What prompted the new date?" disabled></textarea></label></div></div>' +
+        '<div class="oc-block oc-cancelled"><label class="oc"><input type="radio" name="outcome" value="cancelled"> <i class="ic ic-cancel" aria-hidden="true"></i> Cancelled</label>' +
+        '<div class="oc-fields" data-for="cancelled" hidden><label>Cancellation reason <span class="req">*</span><textarea name="note" id="oc_cnote" dir="auto" rows="2" placeholder="Required — why was the deal cancelled?" data-req disabled></textarea></label></div></div>' +
+        '</div><button type="submit" class="primary" id="oc_submit" disabled>Save Update</button></form>';
+    }
+    const agentOpts = Object.keys(AGENTS).map(id => '<option value="' + id + '"' + (+id === d.agent ? ' selected' : '') + '>' + esc(AGENTS[id]) + '</option>').join('');
+    html += '<details class="manager-edit" id="mgrEdit"><summary><span class="me-title"><i class="ic ic-pencil" aria-hidden="true"></i> Edit Deal — Manager Options</span><span class="me-caret" aria-hidden="true">▾</span></summary>' +
+      '<form id="editForm"><div class="row"><label>Follow-Up Date <span class="label-hint">(dd/mm/yyyy)</span><input name="follow" id="ed_follow" type="date" value="' + (d.follow || '') + '"></label>' +
+      '<label>Assigned Salesperson' + (d.agent ? '' : ' <span class="req">— Unassigned, please select</span>') + '<select name="agent" id="ed_agent">' + (d.agent ? '' : '<option value="" selected disabled>Select salesperson…</option>') + agentOpts + '</select></label></div>' +
+      '<button type="submit" class="primary">Save</button></form></details>';
+    if (d.phone) html += '<p class="wa-row"><span class="wa-link">Contact Customer</span></p>';
+    html += '<div class="deal-actions"><button type="button" class="ghost" data-archive="' + d.id + '"><i class="ic ic-archive" aria-hidden="true"></i> ' + (d.archived ? 'Restore from Archive' : 'Move to Archive') + '</button></div></section>';
+
+    const tl = [{ kind: 'event', body: 'Deal created from inbound quote email' + (agent ? ' · assigned to ' + agent : ' · no matching salesperson found'), author: 'System', at: d.created + ' 09:12' }].concat(d.notes);
+    html += '<section class="notes" id="notesSec"><h2>Notes &amp; Activity</h2><ul class="timeline">' + tl.map(n => {
+      const meta = esc(n.author) + ' · ' + esc(n.at);
+      return n.kind === 'event'
+        ? '<li class="tl-event"><span class="tl-dot" aria-hidden="true"></span><span class="tl-event-body" dir="auto">' + esc(n.body) + '</span><span class="tl-event-meta">' + meta + '</span></li>'
+        : '<li class="tl-note"><span class="tl-dot" aria-hidden="true"></span><div class="note"><p dir="auto">' + esc(n.body) + '</p><span class="note-meta">' + meta + '</span></div></li>';
+    }).join('') + '</ul><form id="noteForm"><label>Add a note<textarea name="body" id="noteBody" dir="auto" rows="2" required placeholder="Call summary, customer feedback, next steps..."></textarea></label><button type="submit" class="primary">Add Note</button></form></section>';
+    return chrome(html, d.archived ? 'archive' : 'deals');
+  }
+
+  function inquiryView() {
+    const html = '<section class="inquiry"><h1>Field Inquiry</h1><p class="inquiry-lede">Log customer interest from the field. This emails the manager directly without opening a deal — a tracked deal is only created once an official price quote is emailed.</p>' +
+      (state.inquirySent ? '<p class="inquiry-sent" role="status">Inquiry sent to the manager.</p>' : '') +
+      '<form id="inqForm"><label for="iq_name">Customer Name <span class="req">*</span></label><input id="iq_name" required dir="auto" placeholder="Business name or contact person">' +
+      '<label for="iq_phone">Phone</label><input id="iq_phone" dir="ltr" inputmode="tel" placeholder="050-1234567">' +
+      '<label for="iq_what">What is the customer interested in? <span class="req">*</span></label><textarea id="iq_what" required dir="auto" placeholder="Requirements, scope, timeline"></textarea>' +
+      '<button type="submit" class="primary">Send to Manager</button></form></section>';
+    return chrome(html, 'inquiry');
+  }
+
+  function emailFrame(titleBar, content, footer) {
+    const b = brand(), e = b.email;
+    return '<div class="mail-wrap"><table role="presentation" dir="ltr" width="100%" cellpadding="0" cellspacing="0" style="width:100%;background:#EFF1F5;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;"><tr><td align="center" style="padding:20px;">' +
+      '<table role="presentation" dir="ltr" width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:600px;background:#ffffff;border-radius:12px;border:1px solid #dbe2ee;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;">' +
+      '<tr><td dir="ltr" align="left" style="background:' + e.primary + ';border-bottom:3px solid ' + e.accent + ';padding:12px 20px;color:#ffffff;font-size:15px;font-weight:bold;">' +
+      '<span style="display:inline-block;vertical-align:middle;margin-right:8px;">' + logo(26) + '</span> ' + titleBar + '</td></tr>' +
+      '<tr><td dir="ltr" align="left" style="padding:22px 24px;">' + content + '</td></tr>' +
+      '<tr><td dir="ltr" align="left" style="padding:12px 24px;border-top:1px solid #eef1f4;font-size:12px;color:#7a8694;">' + (footer || 'Automated notification from ' + esc(b.name)) + '</td></tr>' +
+      '</table></td></tr></table></div>';
+  }
+
+  function nudgeDeal() {
+    const cur = byId(state.dealId);
+    const ok = (d) => d && d.status === 'open' && d.agent && !d.archived;
+    return ok(cur) ? cur : (deals.find(ok) || deals[0]);
+  }
+
+  function nudgeView() {
+    const d = nudgeDeal(), b = brand();
+    const content = '<div style="font-size:15px;color:#1f2730;margin-bottom:18px;">Please update the status of this deal.</div>' +
+      '<div style="border-top:1px solid #eef1f4;padding-top:16px;"><div style="font-size:13px;color:#7a8694;margin-bottom:4px;">Deal</div>' +
+      '<div style="font-size:21px;font-weight:bold;color:#1f2730;line-height:1.3;">' + esc(title(d)) + '</div></div>' +
+      '<div style="margin-top:20px;"><a href="#" id="nudgeBtn" class="mail-btn" data-open="' + d.id + '" style="display:inline-block;background:' + b.color + ';color:#fff;text-decoration:none;padding:11px 22px;border-radius:8px;font-weight:bold;font-size:15px;">Open Deal &amp; Update</a></div>' +
+      '<div style="margin-top:16px;font-size:13px;color:#7a8694;">Options: Completed · Schedule Follow-Up (New Date) · Cancelled.</div>';
+    return '<div class="mailhead" id="mailHead"><span class="subj">' + esc(b.name) + ' · Deal Follow-Up Reminder</span><span>From: <b>' + esc(b.name) + ' – System</b></span><span>To: <b>' + esc(agentName(d.agent)) + '</b></span><span>Sent: <b dir="ltr">' + ildate(nudgeAt(d)) + ' 16:00</b></span></div>' +
+      emailFrame(esc(b.name) + ' · Deal Follow-Up Reminder', content);
+  }
+
+  function weeklyView() {
+    const b = brand(), e = b.email;
+    const active = deals.filter(d => !d.archived);
+    const wkStart = '2026-09-21', wkEnd = '2026-09-27', prevStart = '2026-09-14';
+    const inWk = (s, a, z) => s && s >= a && s <= z;
+    const open = active.filter(d => d.status === 'open').length;
+    const doneWk = active.filter(d => d.status === 'completed' && inWk(d.completedOn, wkStart, wkEnd));
+    const doneAmt = doneWk.reduce((s, d) => s + (d.amount || 0), 0);
+    const cancWk = active.filter(d => d.status === 'cancelled').length;
+    const overdue = active.filter(isOverdue).length;
+    const newWk = active.filter(d => inWk(d.created, wkStart, wkEnd)).length, newPrev = active.filter(d => inWk(d.created, prevStart, '2026-09-20')).length;
+    const kpis = [
+      { v: open, l: 'Open', dot: '#5D7FC4' },
+      { v: doneWk.length, l: 'Completed This Week', dot: '#37a866', sub: ils(doneAmt) },
+      { v: cancWk, l: 'Cancelled', dot: '#9aa3b2' },
+      { v: overdue, l: 'Overdue', dot: e.accent }
+    ];
+    const wow = [
+      { label: 'New Deals', cur: newWk, prev: newPrev },
+      { label: 'Completed', cur: doneWk.length, prev: 1 }
+    ];
+    const maxOf = (m) => Math.max(m.cur, m.prev, 1);
+    let c = '<div style="font-size:15px;color:#1f2730;font-weight:bold;margin-bottom:4px;border-left:3px solid ' + e.accent + ';padding-left:8px;">Weekly Summary by Salesperson</div>' +
+      '<div style="font-size:12px;color:#4a5568;margin-bottom:16px;padding-left:11px;">Window: <span dir="ltr">' + ildate(wkStart) + ' – ' + ildate(wkEnd) + '</span></div>' +
+      '<table dir="ltr" cellpadding="0" cellspacing="0" width="100%" id="wkKpis" style="border-collapse:separate;background:' + e.primary + ';border-radius:8px;"><tr>' +
+      kpis.map((t, i) => '<td width="25%" align="center" valign="top" style="padding:12px 4px 10px;' + (i ? 'border-left:1px solid rgba(255,255,255,.18);' : '') + '">' +
+        '<div style="font-size:24px;font-weight:bold;color:#ffffff;line-height:1.1;">' + t.v + '</div>' +
+        '<div style="font-size:11px;color:#d3dae6;margin-top:3px;"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:' + t.dot + ';vertical-align:middle;"></span> ' + t.l + '</div>' +
+        (t.sub ? '<div dir="ltr" style="font-size:11px;color:#e4e9f2;margin-top:2px;">' + t.sub + '</div>' : '') + '</td>').join('') + '</tr></table>' +
+      '<div style="font-size:13px;color:' + e.primary + ';font-weight:bold;margin:18px 0 8px;">Week-over-Week Comparison</div><table dir="ltr" cellpadding="0" cellspacing="0" width="100%" id="wkBars" style="border-collapse:collapse;">' +
+      wow.map((m, i) => '<tr><td colspan="3" style="font-size:12px;font-weight:bold;color:#3d485a;padding:' + (i ? '10px' : '0') + ' 0 3px;">' + m.label + '</td></tr>' +
+        '<tr><td width="80" style="font-size:11px;color:#4a5568;padding:2px 0;">This Week</td><td style="padding:2px 0;"><div style="background:' + e.accent + ';border-radius:0 4px 4px 0;height:12px;width:' + Math.round(m.cur / maxOf(m) * 100) + '%;"></div></td><td width="60" align="right" dir="ltr" style="font-size:12px;color:#1f2730;font-weight:bold;padding:2px 4px 2px 0;">' + m.cur + '</td></tr>' +
+        '<tr><td width="80" style="font-size:11px;color:#4a5568;padding:2px 0;">Last Week</td><td style="padding:2px 0;"><div style="background:#5D7FC4;border-radius:0 4px 4px 0;height:12px;width:' + Math.round(m.prev / maxOf(m) * 100) + '%;"></div></td><td width="60" align="right" dir="ltr" style="font-size:12px;color:#3d485a;padding:2px 4px 2px 0;">' + m.prev + '</td></tr>').join('') + '</table>' +
+      '<table dir="ltr" cellpadding="0" cellspacing="0" width="100%" id="wkAgents" style="border-collapse:collapse;margin-top:18px;"><tr style="background:' + e.bg + ';color:' + e.primary + ';font-size:12px;"><th align="left" style="padding:8px 10px;">Salesperson</th><th style="padding:8px 6px;">Open</th><th style="padding:8px 6px;">Completed</th><th style="padding:8px 6px;">Cancelled</th><th style="padding:8px 6px;">Overdue</th><th style="padding:8px 6px;">Rescheduled</th></tr>' +
+      Object.keys(AGENTS).map(id => {
+        id = +id; const mine = active.filter(d => d.agent === id);
+        const dw = mine.filter(d => d.status === 'completed' && inWk(d.completedOn, wkStart, wkEnd));
+        const amt = dw.reduce((s, d) => s + (d.amount || 0), 0);
+        return '<tr style="border-top:1px solid #e6ebf4;font-size:14px;color:#1f2730;"><td align="left" style="padding:9px 10px;font-weight:bold;">' + esc(AGENTS[id]) + '</td>' +
+          '<td align="center" style="padding:9px 6px;">' + mine.filter(d => d.status === 'open').length + '</td>' +
+          '<td align="center" style="padding:9px 6px;color:#1f7a3d;">' + dw.length + (amt ? '<br><span dir="ltr" style="font-size:11px;color:#3d485a;font-weight:normal;">' + ils(amt) + '</span>' : '') + '</td>' +
+          '<td align="center" style="padding:9px 6px;color:#76808f;">' + mine.filter(d => d.status === 'cancelled').length + '</td>' +
+          '<td align="center" style="padding:9px 6px;color:' + e.accent + ';">' + mine.filter(isOverdue).length + '</td>' +
+          '<td align="center" style="padding:9px 6px;">' + mine.filter(isDelayed).length + '</td></tr>';
+      }).join('') + '</table>';
+    return '<div class="mailhead"><span class="subj">' + esc(b.name) + ' · Weekly Sales Summary</span><span>To: <b>' + esc(MANAGER.name) + '</b></span><span>Sent: <b dir="ltr">' + ildate('2026-09-27') + ' 07:00</b></span></div>' +
+      emailFrame(esc(b.name) + ' · Weekly Sales Summary', c);
+  }
+
+  /* ── annotations (English, for the reader) ── */
+  const NOTES = {
+    list: [
+      { t: 'Status at a glance', d: 'The colored edge on each card shows open, done or cancelled before you read a word.', sel: '.deal' },
+      { t: 'Notes people actually notice', d: 'The manager kept missing his own notes when they were small grey text. Now they stand out.', sel: '.latest-note' },
+      { t: 'Nothing falls through', d: 'A deal with no salesperson is flagged for the manager to assign.', sel: '.owner.unassigned' },
+      { t: 'Each salesperson at a glance', d: 'Per-person charts show what is open, done and late.', sel: '.agent-card' }
+    ],
+    detail: [
+      { t: 'Key facts from the quote', d: 'The customer and amount are read from the attached quote automatically.', sel: '#pdfCustomer, #pdfTotal, .pc-head' },
+      { t: 'Three choices, no guesswork', d: 'Pick an outcome and only the fields it needs appear. Try it.', sel: '#outcomeForm' },
+      { t: 'A history that reads easily', d: 'System events stay quiet. Notes written by people stand out.', sel: '.timeline' },
+      { t: 'The right tools for each role', d: 'Only the manager can reassign or edit a deal.', sel: '#mgrEdit' }
+    ],
+    nudge: [
+      { t: 'One tap to the deal', d: 'The button opens that exact deal. Try it.', sel: '#nudgeBtn' },
+      { t: 'Looks right in every inbox', d: 'Designed to look the same in Gmail, Outlook and phone mail apps.', sel: '.mail-wrap' }
+    ],
+    weekly: [
+      { t: 'The numbers first', d: 'Open, closed this week with its value, cancelled, and late.', sel: '#wkKpis' },
+      { t: 'This week against last', d: 'A quick trend without opening anything.', sel: '#wkBars' },
+      { t: 'Per salesperson', d: 'One row per person, so the manager knows who to talk to.', sel: '#wkAgents' }
+    ]
+  };
+
+  /* ── render ── */
+  const appEl = document.getElementById('app');
+  const screenEl = document.getElementById('screen');
+  const urlEl = document.getElementById('url');
+  const notesEl = document.getElementById('notes');
+  let pinned = null;
+
+  function applyBrand() {
+    const b = brand();
+    appEl.style.setProperty('--brand', b.color);
+    appEl.style.setProperty('--brand-press', b.press);
+    appEl.style.setProperty('--slate', b.slate);
+    document.documentElement.style.setProperty('--accent', b.color);
+  }
+
+  function pageView() { return state.view === 'inquiry' ? 'list' : state.view; }
+
+  function render(keepScroll) {
+    applyBrand();
+    const v = state.view;
+    appEl.innerHTML = v === 'list' ? listView() : v === 'detail' ? detailView() : v === 'nudge' ? nudgeView() : v === 'weekly' ? weeklyView() : inquiryView();
+    appEl.classList.toggle('narrow', state.dev === 'phone');
+    const path = v === 'list' ? (state.archive ? '/archive' : '/') : v === 'detail' ? '/deals/' + state.dealId : v === 'inquiry' ? '/inquiries/new' : null;
+    urlEl.innerHTML = path ? 'tracker.example.com<b>' + path + '</b>' : (v === 'nudge' ? 'mail · inbox · <b>agent</b>' : 'mail · inbox · <b>manager</b>');
+    document.querySelectorAll('#viewSeg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.view === pageView())));
+    renderNotes();
+    if (!keepScroll) screenEl.scrollTop = 0;
+  }
+
+  function renderNotes() {
+    const set = NOTES[pageView()] || [];
+    notesEl.innerHTML = set.map((n, i) => '<li tabindex="0" data-i="' + i + '"><b>' + esc(n.t) + '</b><span>' + esc(n.d) + '</span></li>').join('');
+    pinned = null;
+  }
+
+  function highlight(i, on) {
+    appEl.querySelectorAll('.hl').forEach(el => el.classList.remove('hl'));
+    notesEl.querySelectorAll('li').forEach(li => li.classList.toggle('on', on && +li.dataset.i === i));
+    if (!on) return;
+    const n = (NOTES[pageView()] || [])[i];
+    if (!n) return;
+    const els = appEl.querySelectorAll(n.sel);
+    els.forEach(el => el.classList.add('hl'));
+    const first = els[0];
+    if (first) {
+      const behavior = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+      const boxed = screenEl.scrollHeight > screenEl.clientHeight + 1;   // desktop: the device scrolls itself
+      const r = first.getBoundingClientRect();
+      if (boxed) {
+        const s = screenEl.getBoundingClientRect();
+        if (r.top < s.top || r.bottom > s.bottom) screenEl.scrollTo({ top: screenEl.scrollTop + (r.top - s.top) - 60, behavior });
+      } else if (r.top < 0 || r.bottom > innerHeight) first.scrollIntoView({ block: 'center', behavior });
+    }
+  }
+
+  notesEl.addEventListener('mouseover', e => { const li = e.target.closest('li'); if (li && pinned === null) highlight(+li.dataset.i, true); });
+  notesEl.addEventListener('mouseleave', () => { if (pinned === null) highlight(-1, false); });
+  notesEl.addEventListener('focusin', e => { const li = e.target.closest('li'); if (li) highlight(+li.dataset.i, true); });
+  notesEl.addEventListener('click', e => {
+    const li = e.target.closest('li'); if (!li) return;
+    const i = +li.dataset.i;
+    if (pinned === i) { pinned = null; highlight(-1, false); } else { pinned = i; highlight(i, true); }
+  });
+
+  /* page controls */
+  document.getElementById('viewSeg').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    state.flash = '';
+    state.view = b.dataset.view;
+    if (state.view === 'list') state.archive = false;
+    render();
+  });
+  document.getElementById('devSeg').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    state.dev = b.dataset.dev;
+    document.querySelectorAll('#devSeg button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    document.getElementById('browser').classList.toggle('phone', state.dev === 'phone');
+    render(true);
+  });
+  const brandSeg = document.getElementById('brandSeg');
+  brandSeg.innerHTML = Object.keys(BRANDS).map(k => '<button type="button" class="swatch" data-brand="' + k + '" aria-pressed="' + (k === state.brand) + '"><i style="background:' + BRANDS[k].color + '"></i>' + esc(BRANDS[k].name) + '</button>').join('');
+  brandSeg.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    state.brand = b.dataset.brand;
+    brandSeg.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    render(true);
+  });
+  document.getElementById('resetDemo').addEventListener('click', e => {
+    e.preventDefault(); deals = seed();
+    Object.assign(state, { view: 'list', dealId: 31, sub: 'open', q: '', archive: false, flash: '', inquirySent: false });
+    render();
+  });
+
+  /* in-app interactions */
+  function openDeal(id) { state.dealId = id; state.view = 'detail'; state.flash = ''; render(); }
+
+  appEl.addEventListener('click', e => {
+    const t = e.target;
+    const open = t.closest('[data-open]');
+    if (open) { e.preventDefault(); openDeal(+open.dataset.open); return; }
+    if (t.closest('[data-back]')) { e.preventDefault(); state.view = 'list'; state.flash = ''; render(); return; }
+    const sub = t.closest('[data-sub]');
+    if (sub) { state.sub = sub.dataset.sub; render(true); return; }
+    const nav = t.closest('[data-nav]');
+    if (nav) {
+      state.flash = ''; state.q = '';
+      if (nav.dataset.nav === 'inquiry') { state.view = 'inquiry'; state.inquirySent = false; }
+      else { state.view = 'list'; state.archive = nav.dataset.nav === 'archive'; state.sub = 'open'; }
+      render(); return;
+    }
+    const arc = t.closest('[data-archive]');
+    if (arc) {
+      const d = byId(+arc.dataset.archive);
+      d.archived = !d.archived;
+      d.notes.push({ kind: 'event', body: d.archived ? 'Moved to archive' : 'Restored from archive', author: MANAGER.name, at: TODAY + ' 10:05' });
+      state.flash = d.archived ? 'Deal moved to archive. You can restore it from the Archive tab.' : 'Deal restored from archive.';
+      state.view = 'list'; state.archive = false; render(); return;
+    }
+  });
+
+  appEl.addEventListener('change', e => {
+    if (e.target.name !== 'outcome') return;
+    const kind = e.target.value;
+    appEl.querySelectorAll('.oc-block').forEach(block => {
+      const f = block.querySelector('.oc-fields');
+      const on = !!f && f.dataset.for === kind;
+      if (f) { f.hidden = !on; f.querySelectorAll('input,textarea').forEach(el => { el.disabled = !on; if (el.hasAttribute('data-req')) el.required = on; }); }
+    });
+    document.getElementById('oc_submit').disabled = false;
+  });
+
+  appEl.addEventListener('input', e => {
+    if (e.target.id !== 'dsq') return;
+    clearTimeout(appEl._t);
+    appEl._t = setTimeout(() => {
+      state.q = e.target.value;
+      const pos = e.target.selectionStart;
+      render(true);
+      const q = document.getElementById('dsq'); if (q) { q.focus(); try { q.setSelectionRange(pos, pos); } catch (_) {} }
+    }, 300);
+  });
+
+  const now = () => TODAY + ' ' + new Date().toTimeString().slice(0, 5);
+
+  appEl.addEventListener('submit', e => {
+    e.preventDefault();
+    const f = e.target;
+    if (f.id === 'searchForm') return;
+    if (f.id === 'inqForm') {
+      if (!f.checkValidity()) { f.reportValidity(); return; }
+      state.inquirySent = true; render(); return;
+    }
+    const d = byId(state.dealId);
+    const who = MANAGER.name;
+    if (f.id === 'noteForm') {
+      const body = document.getElementById('noteBody').value.trim();
+      if (!body) { f.reportValidity(); return; }
+      d.notes.push({ kind: 'note', body, author: who, at: now() });
+      state.flash = 'Note added.'; render(true); return;
+    }
+    if (f.id === 'editForm') {
+      const nf = document.getElementById('ed_follow').value, na = document.getElementById('ed_agent').value;
+      if (nf && nf !== d.follow) { if (d.follow && !d.followOrig) d.followOrig = d.follow; d.notes.push({ kind: 'event', body: 'Follow-up date updated to ' + ildate(nf), author: who, at: now() }); d.follow = nf; d.editor = who; }
+      if (na && +na !== d.agent) { d.agent = +na; d.notes.push({ kind: 'event', body: 'Assigned to ' + AGENTS[na], author: who, at: now() }); }
+      state.flash = 'Deal updated.'; render(); return;
+    }
+    if (f.id === 'outcomeForm') {
+      if (!f.checkValidity()) { f.reportValidity(); return; }
+      const kind = (f.querySelector('input[name="outcome"]:checked') || {}).value;
+      if (kind === 'completed') {
+        d.status = 'completed'; d.completedOn = TODAY;
+        d.notes.push({ kind: 'event', body: 'Status updated: Completed', author: who, at: now() });
+        state.flash = 'Deal marked as completed.';
+      } else if (kind === 'reschedule') {
+        const nd = document.getElementById('oc_date').value, why = document.getElementById('oc_rnote').value.trim();
+        if (!d.followOrig) d.followOrig = d.follow || nd;
+        d.notes.push({ kind: 'event', body: 'Follow-up date updated' + (d.follow ? ': ' + ildate(d.follow) + ' → ' + ildate(nd) : ' to ' + ildate(nd)), author: who, at: now() });
+        if (why) d.notes.push({ kind: 'note', body: why, author: who, at: now() });
+        d.follow = nd; d.editor = who; d.nudgeAt = nd;
+        state.flash = 'Follow-up date updated and reminder rescheduled.';
+      } else if (kind === 'cancelled') {
+        const why = document.getElementById('oc_cnote').value.trim();
+        d.status = 'cancelled';
+        d.notes.push({ kind: 'event', body: 'Deal cancelled · Manager notified', author: who, at: now() });
+        d.notes.push({ kind: 'note', body: why, author: who, at: now() });
+        state.flash = 'Deal cancelled. Manager notified via email.';
+      }
+      render(); return;
+    }
+  });
+
+  render();
+})();
+</script>
+
+</body></html>
